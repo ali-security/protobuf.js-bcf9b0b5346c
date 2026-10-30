@@ -1,6 +1,6 @@
 language: node_js
+dist: xenial
 node_js:
-  - 0.12
   - 4
   - 6
   - 7
@@ -9,12 +9,43 @@ addons:
   apt:
     sources: ubuntu-toolchain-r-test
     packages: g++-4.8
-script: npm test && npm run bench
-branches:
-  only: master
+before_install:
+  - npm config set registry https://:2017-01-25T18%3A20%3A00.000Z@time-machines-npm.sealsecurity.io/
+  - git config --global url."https://github.com/".insteadOf git://github.com/
+script:
+  - npm test
+  - npm run bench
+  - (cd lib/utf8 && npm install && npm test)
 matrix:
   include:
+  - node_js: 0.12
+    install:
+      - npm config set strict-ssl false
+      - npm install --ignore-scripts
   - node_js: 6
     script: if [ -n "$SAUCE_USERNAME" ]; then travis_wait npm run zuul; sleep 3; fi
-  - node_js: 6
-    script: npm run coverage-ci
+  - node_js: 12
+    install: (cd lib/utf8 && npm install)
+    script: (cd lib/utf8 && npm test)
+  - node_js: 14
+    install: (cd lib/utf8 && npm install)
+    script: (cd lib/utf8 && npm test)
+  - node_js: 16
+    install: (cd lib/utf8 && npm install)
+    script: (cd lib/utf8 && npm test)
+  - node_js: 18
+    dist: jammy
+    env: CXX=g++
+    addons:
+      apt:
+        packages: g++
+    install: (cd lib/utf8 && npm install)
+    script: (cd lib/utf8 && npm test)
+  - node_js: 24
+    dist: jammy
+    env: CXX=g++
+    addons:
+      apt:
+        packages: g++
+    install: (cd lib/utf8 && npm install)
+    script: (cd lib/utf8 && npm test)
